@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <Title>Cjsha.Phidget22</Title>
-    <Description>A package for the Bonsai visual programming language.</Description>
-    <Authors></Authors>
+    <Description>A Bonsai wrapper for Phidget22 API.</Description>
+    <Authors>Cristian Sharp</Authors>
     <Copyright>Copyright ©  2025</Copyright>
     <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
     <PackageProjectUrl></PackageProjectUrl>
