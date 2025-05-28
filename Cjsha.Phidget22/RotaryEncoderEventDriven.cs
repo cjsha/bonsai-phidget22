@@ -18,11 +18,11 @@ namespace Cjsha.Phidget22
 
         [Description("")]
         [Range(0, 5)]
-        public int Channel { get; set; } = 0;
+        public int HubPort { get; set; } = 0;
 
         public IObservable<long> Generate()
         {
-            Encoder encoder = new Encoder{ Channel = Channel };
+            Encoder encoder = new Encoder{ HubPort = HubPort };
             encoder.Open(Phidget.DefaultTimeout);
             encoder.PositionChangeTrigger = PositionChangeTrigger;
 
