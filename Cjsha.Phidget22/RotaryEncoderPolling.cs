@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using Phidget22;
 using Phidget22.Events;
+using System.Reactive;
 
 namespace Cjsha.Phidget22
 {
@@ -13,25 +14,44 @@ namespace Cjsha.Phidget22
     public class RotaryEncoderPolling
     {
         [Description("")]
-        public float SampleFrequencyHz { get; set; } = 100;
-
-        [Description("")]
         [Range(0, 5)]
         public int HubPort { get; set; } = 0;
 
-        public IObservable<long> Generate()
+        public static IDisposable SubscribeSafe<TSource, TResult>(
+            IObservable<TSource> source,
+            IObserver<TResult> observer,
+            Action<TSource> onNext)
         {
-            Encoder encoder = new Encoder { HubPort = HubPort };
-            encoder.Open(Phidget.DefaultTimeout);
-            encoder.DataRate = SampleFrequencyHz;
+            var sourceObserver = Observer.Create<TSource>(
+                value =>
+                {
+                    try { onNext(value); }
+                    catch (Exception ex)
+                    {
+                        observer.OnError(ex);
+                    }
+                },
+                observer.OnError,
+                observer.OnCompleted);
+            return source.SubscribeSafe(sourceObserver);
+        }
 
-            return Observable.FromEventPattern<EncoderPositionChangeEventHandler, EncoderPositionChangeEventArgs>
-            (
-                h => encoder.PositionChange += h,
-                h => encoder.PositionChange -= h
-            )
-            .Select(encoderEvent => ((Encoder)encoderEvent.Sender).Position)
-            .Finally(() => encoder.Close());
+        public unsafe IObservable<long> Generate<TSource>(IObservable<TSource> source)
+        {
+            Encoder encoder = new Encoder 
+            { 
+                HubPort = HubPort, 
+                DeviceSerialNumber = 767469 
+            };
+            encoder.Open(Phidget.DefaultTimeout);
+
+            return Observable.Create<long>(observer =>
+            {
+                return SubscribeSafe(source, observer, _ =>
+                {
+                    observer.OnNext(encoder.Position);
+                });
+            });
         }
     }
 }
