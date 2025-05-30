@@ -3,7 +3,6 @@ using System;
 using System.ComponentModel;
 using System.Reactive.Linq;
 using Phidget22;
-using Phidget22.Events;
 using System.Reactive;
 
 namespace Cjsha.Phidget22
@@ -38,10 +37,10 @@ namespace Cjsha.Phidget22
 
         public unsafe IObservable<long> Generate<TSource>(IObservable<TSource> source)
         {
-            Encoder encoder = new Encoder 
-            { 
-                HubPort = HubPort, 
-                DeviceSerialNumber = 767469 
+            var encoder = new Encoder()
+            {
+                HubPort = HubPort,
+                DeviceSerialNumber = 767469
             };
             encoder.Open(Phidget.DefaultTimeout);
 
@@ -51,7 +50,8 @@ namespace Cjsha.Phidget22
                 {
                     observer.OnNext(encoder.Position);
                 });
-            });
+            })
+            .Finally(() => encoder.Close());
         }
     }
 }
