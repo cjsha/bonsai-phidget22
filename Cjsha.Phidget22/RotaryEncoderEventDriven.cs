@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using Phidget22;
 using Phidget22.Events;
-using System.Reactive;
 
 namespace Cjsha.Phidget22
 {
@@ -26,14 +25,15 @@ namespace Cjsha.Phidget22
 
         public override IObservable<long> Generate()
         {
-            Encoder encoder = new Encoder
+            var encoder = new Encoder()
             {
                 HubPort = HubPort,
-                DeviceSerialNumber = 767469,
-                PositionChangeTrigger = PositionChangeTrigger,
-                DataRate = SampleFrequencyHz
+                DeviceSerialNumber = 767469
             };
+
             encoder.Open(Phidget.DefaultTimeout);
+            encoder.PositionChangeTrigger = PositionChangeTrigger;
+            encoder.DataRate = SampleFrequencyHz;
 
             return Observable.FromEventPattern<EncoderPositionChangeEventHandler, EncoderPositionChangeEventArgs>
             (
